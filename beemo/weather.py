@@ -1,5 +1,6 @@
 from __future__ import annotations
 from datetime import datetime
+from urllib.parse import quote
 import requests
 from beemo.config import Config
 
@@ -26,7 +27,7 @@ def get_weather(config: Config) -> dict | None:
         city = _get_city()
         url = (
             f'https://api.openweathermap.org/data/2.5/weather'
-            f'?q={city}&appid={config.openweathermap_key}&units=metric'
+            f'?q={quote(city)}&appid={config.openweathermap_key}&units=metric'
         )
         resp = requests.get(url, timeout=5)
         resp.raise_for_status()
