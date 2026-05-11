@@ -14,8 +14,8 @@ class MusicPlayer:
                  '--get-url', '--no-playlist', '-q'],
                 capture_output=True, text=True, timeout=30,
             )
-        except FileNotFoundError:
-            print("yt-dlp is not installed. Run: pip install yt-dlp")
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            print("yt-dlp is not installed or timed out. Run: pip install yt-dlp")
             return
 
         url = result.stdout.strip().split('\n')[0]

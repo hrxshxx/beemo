@@ -24,10 +24,18 @@ def load_config() -> Config:
         if not val:
             print(f"Missing required environment variable: {key}", file=sys.stderr)
             sys.exit(1)
+    briefing_time = os.getenv('BRIEFING_TIME', '08:00')
+    try:
+        h, m = briefing_time.split(':')
+        int(h)
+        int(m)
+    except (ValueError, AttributeError):
+        print(f"BRIEFING_TIME must be HH:MM, got: {briefing_time!r}", file=sys.stderr)
+        sys.exit(1)
     return Config(
         openai_api_key=required['OPENAI_API_KEY'],
         openweathermap_key=required['OPENWEATHERMAP_KEY'],
         news_api_key=required['NEWS_API_KEY'],
-        briefing_time=os.getenv('BRIEFING_TIME', '08:00'),
+        briefing_time=briefing_time,
         news_country=os.getenv('NEWS_COUNTRY', 'us'),
     )
