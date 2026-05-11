@@ -22,7 +22,7 @@ def load_config() -> Config:
     }
     for key, val in required.items():
         if not val:
-            print(f"Missing required environment variable: {key}")
+            print(f"Missing required environment variable: {key}", file=sys.stderr)
             sys.exit(1)
     return Config(
         openai_api_key=required['OPENAI_API_KEY'],
