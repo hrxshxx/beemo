@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Beemo — Ambient intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg-0:#05030a;
+    --ink:#f4f1ff;
+    --ink-2:rgba(244,241,255,.62);
+    --ink-3:rgba(244,241,255,.38);
+    --line:rgba(255,255,255,.08);
+    --line-2:rgba(255,255,255,.14);
+
+    --accent-a:#a78bff;
+    --accent-b:#6b3df5;
+    --accent-c:#3a0ea8;
+
+    --ease: cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg-0);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow:hidden}
+  body{min-height:100vh;position:relative}
+
+  /* ---------- atmosphere ---------- */
+  .sky{position:fixed;inset:0;z-index:0;pointer-events:none;contain:strict;
+    background:
+      radial-gradient(80% 60% at 20% 10%, rgba(110,60,240,.32), transparent 60%),
+      radial-gradient(70% 50% at 90% 20%, rgba(40,90,255,.22), transparent 60%),
+      radial-gradient(60% 40% at 50% 100%, rgba(180,90,255,.18), transparent 60%),
+      linear-gradient(180deg, #07041a 0%, #050310 40%, #060418 100%);
+    transition: transform 2.4s var(--ease), filter 2.4s var(--ease);
+  }
+  .sky::after{
+    content:"";position:absolute;inset:0;
+    background-image:
+      radial-gradient(1px 1px at 25% 30%, rgba(255,255,255,.6) 50%, transparent 51%),
+      radial-gradient(1px 1px at 70% 65%, rgba(255,255,255,.5) 50%, transparent 51%),
+      radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,.4) 50%, transparent 51%),
+      radial-gradient(1px 1px at 85% 18%, rgba(255,255,255,.5) 50%, transparent 51%),
+      radial-gradient(1px 1px at 12% 70%, rgba(255,255,255,.35) 50%, transparent 51%);
+    opacity:.5;
+    animation: twinkle 8s linear infinite;
+  }
+  @keyframes twinkle{ 0%,100%{opacity:.35} 50%{opacity:.65} }
+  #particles{position:fixed;inset:0;z-index:1;pointer-events:none;contain:strict;will-change:transform}
+  .grain{
+    position:fixed;inset:0;z-index:2;pointer-events:none;mix-blend-mode:overlay;opacity:.08;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* ---------- shared glass ---------- */
+  .glass{
+    background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    border:1px solid var(--line-2);
+    backdrop-filter: blur(16px) saturate(130%);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.18),
+      inset 0 -1px 0 rgba(255,255,255,.04),
+      0 20px 60px rgba(0,0,0,.45);
+  }
+
+  /* ---------- nav ---------- */
+  nav.top{
+    position:fixed;top:18px;left:50%;transform:translateX(-50%);
+    z-index:50;display:flex;align-items:center;gap:6px;
+    padding:8px 10px 8px 18px;border-radius:999px;
+    width: min(880px, calc(100vw - 32px));
+    animation: floatIn 1.2s var(--ease) both;
+  }
+  @keyframes floatIn{ from{ opacity:0; transform:translate(-50%, -12px)} to{opacity:1; transform:translate(-50%,0)} }
+  .brand{display:flex;align-items:center;gap:10px;margin-right:auto;font-weight:500;letter-spacing:.02em}
+  .brand .dot{width:22px;height:22px;border-radius:999px;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,.5) 0 18%, transparent 30%),
+      radial-gradient(circle at 60% 60%, var(--accent-a) 0 40%, var(--accent-b) 60%, var(--accent-c) 100%);
+    box-shadow: 0 0 18px var(--accent-a), inset 0 0 6px rgba(255,255,255,.6);
+  }
+  nav.top a{
+    color:var(--ink-2);text-decoration:none;font-size:13px;letter-spacing:.01em;
+    padding:8px 14px;border-radius:999px;transition:.3s var(--ease);
+    border:1px solid transparent;
+  }
+  nav.top a:hover{color:var(--ink);background:rgba(255,255,255,.06);border-color:var(--line)}
+  nav.top .cta{
+    color:var(--ink);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);
+  }
+  nav.top .cta:hover{background:rgba(255,255,255,.16)}
+
+  /* ---------- hero ---------- */
+  main{
+    position:relative;z-index:5;min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding: 120px 20px 80px; text-align:center;
+    transition: transform 1.6s var(--ease), opacity 1.4s var(--ease), filter 1.6s var(--ease);
+  }
+
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:6px 12px 6px 8px;border-radius:999px;
+    background:rgba(255,255,255,.04);border:1px solid var(--line);
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2);
+    animation: rise 1s var(--ease) both;
+  }
+  .eyebrow .pulse{width:7px;height:7px;border-radius:999px;background:var(--accent-a);
+    box-shadow:0 0 12px var(--accent-a); animation: pulseDot 2.4s var(--ease) infinite;}
+  @keyframes pulseDot{ 0%,100%{transform:scale(1);opacity:.8} 50%{transform:scale(1.4);opacity:1} }
+
+  h1.hero{
+    font-family:'Instrument Serif', serif;
+    font-weight:400;font-style:italic;
+    font-size: clamp(54px, 9vw, 140px);
+    line-height:.96;letter-spacing:-.02em;
+    margin: 28px 0 0;
+    background: linear-gradient(180deg,#fff 0%, rgba(255,255,255,.7) 90%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation: rise 1.1s var(--ease) .1s both;
+  }
+  h1.hero .non-italic{ font-style:normal; font-family:'Inter', sans-serif; font-weight:200; letter-spacing:-.04em;}
+  .sub{
+    max-width: 580px; color:var(--ink-2); font-size: 17px; line-height:1.55;
+    margin: 26px auto 0; animation: rise 1.2s var(--ease) .2s both;
+  }
+  @keyframes rise{ from{opacity:0; transform: translateY(14px)} to{opacity:1; transform:none} }
+
+  /* ---------- distant planet (Beemo) ---------- */
+  .planet-wrap{
+    position:relative; margin: 56px 0 16px;
+    width: 220px; height: 220px;
+    animation: rise 1.4s var(--ease) .35s both, floatY 8s var(--ease) infinite;
+  }
+  @keyframes floatY{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .planet-wrap .halo{
+    position:absolute; inset:-50%;
+    background: radial-gradient(closest-side, var(--accent-a) 0%, transparent 60%);
+    filter: blur(28px); opacity:.5; pointer-events:none;
+  }
+  .planet{
+    position:absolute; inset:0; border-radius:999px;
+    box-shadow: 0 30px 60px rgba(0,0,0,.5), inset 0 0 60px rgba(255,255,255,.06);
+  }
+  .planet svg{width:100%;height:100%;display:block;border-radius:999px}
+  .planet .gloss{
+    position:absolute; inset:0; border-radius:999px; pointer-events:none;
+    background:
+      radial-gradient(circle at 32% 28%, rgba(255,255,255,.55) 0%, transparent 22%),
+      radial-gradient(circle at 70% 78%, rgba(255,255,255,.15) 0%, transparent 35%);
+    mix-blend-mode: screen;
+  }
+  .planet .ring-orbit{
+    position:absolute; inset:-22%; border-radius:999px;
+    border:1px dashed rgba(255,255,255,.15);
+    transform: rotateX(72deg) rotate(0deg);
+    animation: spinOrbit 22s linear infinite;
+  }
+  @keyframes spinOrbit{ to{ transform: rotateX(72deg) rotate(360deg) } }
+
+  /* ---------- CTA ---------- */
+  .cta-row{
+    display:flex;align-items:center;gap:14px;margin-top:36px;
+    animation: rise 1.3s var(--ease) .45s both;
+  }
+  .use-beemo{
+    position:relative; display:inline-flex;align-items:center;gap:14px;
+    padding: 16px 22px 16px 26px; border-radius: 999px; cursor:pointer;
+    border:1px solid rgba(255,255,255,.22);
+    background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.04));
+    backdrop-filter: blur(20px) saturate(140%);
+    color:var(--ink); font: 500 15px/1 'Inter',sans-serif; letter-spacing:.01em;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.4),
+      0 18px 50px rgba(0,0,0,.4),
+      0 0 0 0 var(--accent-a);
+    transition: .35s var(--ease);
+    overflow:hidden;
+  }
+  .use-beemo::before{
+    content:""; position:absolute; inset:-2px; border-radius:inherit;
+    background: conic-gradient(from 0deg, transparent 0deg, var(--accent-a) 60deg, transparent 120deg, transparent 360deg);
+    opacity:.5; animation: spin 6s linear infinite; z-index:-1;
+    -webkit-mask: linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
+    mask: linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    padding:1px;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg) } }
+  .use-beemo:hover{
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, rgba(255,255,255,.2), rgba(255,255,255,.06));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 22px 60px rgba(0,0,0,.5), 0 0 50px -10px var(--accent-a);
+  }
+  .use-beemo .rocket-ico{
+    width:28px;height:28px;border-radius:999px;display:grid;place-items:center;
+    background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+    box-shadow: 0 0 18px var(--accent-a), inset 0 1px 0 rgba(255,255,255,.5);
+    color:#1a0a3e; flex:0 0 auto;
+  }
+  .use-beemo .rocket-ico svg{ width:14px; height:14px; }
+  .use-beemo .kbd{
+    margin-left: 4px; padding: 4px 8px; border-radius: 8px;
+    border:1px solid var(--line-2); background: rgba(255,255,255,.04);
+    font: 400 11px/1 'JetBrains Mono', monospace; color: var(--ink-2); letter-spacing:.06em;
+  }
+  .ghost-link{
+    color:var(--ink-3); text-decoration:none; font-size: 13px; letter-spacing:.02em;
+    border-bottom:1px solid transparent; padding-bottom:2px; transition:.3s var(--ease);
+  }
+  .ghost-link:hover{ color:var(--ink); border-color: var(--line-2) }
+
+  /* ---------- side meta ---------- */
+  .meta-l{
+    position:fixed; left:24px; bottom:28px; z-index:30;
+    font: 400 10px/1 'JetBrains Mono', monospace; color: var(--ink-3);
+    letter-spacing:.22em; text-transform:uppercase; display:flex; gap:14px;
+    animation: rise 1.8s var(--ease) .9s both;
+  }
+  .meta-r{
+    position:fixed; right:24px; bottom:28px; z-index:30;
+    font: 400 10px/1 'JetBrains Mono', monospace; color: var(--ink-3);
+    letter-spacing:.22em; text-transform:uppercase; display:flex; gap:14px; align-items:center;
+    animation: rise 1.8s var(--ease) 1s both;
+  }
+  .meta-r .dot{width:6px;height:6px;border-radius:999px;background:var(--accent-a);box-shadow:0 0 10px var(--accent-a)}
+  @media(max-width:720px){ .meta-l, .meta-r{ display:none } }
+
+  /* ====================================================== */
+  /* LAUNCH SEQUENCE                                          */
+  /* ====================================================== */
+  .launch-overlay{
+    position:fixed; inset:0; z-index:200; pointer-events:none;
+    opacity:0; transition: opacity .3s linear;
+  }
+  body.launching .launch-overlay{ opacity:1; }
+
+  /* hero exit during launch */
+  body.launching main{
+    transform: scale(.86) translateY(40px);
+    opacity:0; filter: blur(6px);
+  }
+  body.launching .sky{ transform: scale(1.25); filter: blur(2px) brightness(1.1); }
+  body.launching .planet-wrap{ animation: shrinkAway 1.8s var(--ease) forwards; }
+  @keyframes shrinkAway{
+    0%{ transform: translateY(0) scale(1); opacity:1 }
+    60%{ transform: translateY(-40px) scale(.4); opacity:.6 }
+    100%{ transform: translateY(-80px) scale(.05); opacity:0 }
+  }
+
+  /* zooming starfield during launch */
+  .warp{
+    position:absolute; inset:0; pointer-events:none;
+    perspective: 700px; overflow:hidden;
+  }
+  .warp .streak{
+    position:absolute; left:50%; top:50%;
+    width:2px; height:0;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.95));
+    border-radius:2px;
+    transform-origin: top center;
+    opacity:0;
+  }
+  body.launching .warp .streak{ animation: streak 1.6s linear forwards }
+  @keyframes streak{
+    0%{ height:0; opacity:0 }
+    20%{ opacity:.9 }
+    100%{ height: 120vh; opacity:0; }
+  }
+
+  /* rocket */
+  .rocket{
+    position:absolute; left:50%; bottom:18%;
+    transform: translate(-50%, 0);
+    opacity:0;
+  }
+  body.launching .rocket{ animation: rocketUp 2.2s cubic-bezier(.6,.05,.4,1) forwards }
+  @keyframes rocketUp{
+    0%{ opacity:0; transform: translate(-50%, 40px) scale(.6) }
+    8%{ opacity:1 }
+    35%{ transform: translate(-50%, -20vh) scale(1) }
+    100%{ opacity:0; transform: translate(-50%, -160vh) scale(.5) }
+  }
+  .rocket svg{ width:84px; height:auto; display:block; filter: drop-shadow(0 0 20px var(--accent-a)); }
+  .rocket .flame{
+    position:absolute; left:50%; top:100%;
+    transform: translateX(-50%);
+    width:34px; height:120px;
+    background: radial-gradient(50% 30% at 50% 0%, #fff 0%, var(--accent-a) 25%, var(--accent-b) 55%, transparent 80%);
+    filter: blur(4px); opacity:.95;
+    animation: flicker .12s steps(2) infinite;
+    border-radius: 50%;
+  }
+  @keyframes flicker{ 0%{transform:translateX(-50%) scaleY(1)} 100%{transform:translateX(-50%) scaleY(1.08)} }
+
+  /* flash + countdown */
+  .flash-bloom{
+    position:absolute; inset:0;
+    background: radial-gradient(40% 40% at 50% 60%, rgba(255,255,255,.95), rgba(255,255,255,0) 70%);
+    opacity:0;
+  }
+  body.launching .flash-bloom{ animation: bloomFlash 2.2s var(--ease) forwards }
+  @keyframes bloomFlash{
+    0%{opacity:0}
+    18%{opacity:.5}
+    70%{opacity:.1}
+    100%{opacity:1; background: radial-gradient(80% 80% at 50% 50%, rgba(255,255,255,1), rgba(255,255,255,1) 100%);}
+  }
+
+  .countdown{
+    position:absolute; left:50%; top:50%; transform:translate(-50%, -50%);
+    font: 300 18px/1 'JetBrains Mono', monospace; letter-spacing:.4em; text-transform:uppercase;
+    color:var(--ink); opacity:0;
+  }
+  body.launching .countdown{ animation: countdownIn .9s var(--ease) forwards }
+  @keyframes countdownIn{
+    0%{opacity:0; transform:translate(-50%,-50%) scale(.94)}
+    25%{opacity:1; transform:translate(-50%,-50%) scale(1)}
+    85%{opacity:1}
+    100%{opacity:0; transform:translate(-50%,-50%) scale(.96)}
+  }
+
+  /* reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation: none !important; transition: none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="sky"></div>
+  <canvas id="particles"></canvas>
+  <div class="grain"></div>
+
+  <nav class="top glass">
+    <div class="brand">
+      <div class="dot" aria-hidden="true"></div>
+      <b>Beemo</b>
+      <span style="color:var(--ink-3);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-left:6px">v 0.4 · ambient</span>
+    </div>
+    <a href="auth.html?m=login" class="navlink">Login</a>
+    <a href="auth.html?m=signup" class="cta" id="navLaunch">Sign up</a>
+  </nav>
+
+  <main id="hero">
+    <span class="eyebrow"><span class="pulse"></span> ambient intelligence · alpha</span>
+
+    <h1 class="hero">Meet <em>Beemo.</em><br/><span class="non-italic">Calm, fluent, alive.</span></h1>
+    <p class="sub">A soft-presence assistant that listens, thinks and replies in real time — a quiet companion living between your apps, your voice and your spaces.</p>
+
+    <div class="cta-row" style="margin-top:48px">
+      <button class="use-beemo" id="useBeemo" type="button">
+        <span class="rocket-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09Z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2Z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        </span>
+        Use Beemo
+        <span class="kbd">↩</span>
+      </button>
+      <a class="ghost-link" href="#">Watch the keynote</a>
+    </div>
+  </main>
+
+  <div class="meta-l">
+    <span>© Beemo Labs</span>
+    <span>Built in soft silicon</span>
+  </div>
+  <div class="meta-r">
+    <span class="dot"></span>
+    <span>Core 0x4F3A · online</span>
+  </div>
+
+  <!-- ===== Launch overlay ===== -->
+  <div class="launch-overlay">
+    <div class="warp" id="warp"></div>
+    <div class="rocket" id="rocket">
+      <svg viewBox="0 0 64 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="body" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#d8c9ff"/>
+          </linearGradient>
+          <linearGradient id="window" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#a78bff"/>
+            <stop offset="100%" stop-color="#3a0ea8"/>
+          </linearGradient>
+        </defs>
+        <!-- nosecone + body -->
+        <path d="M32 2 C44 16 50 36 50 60 L50 76 L14 76 L14 60 C14 36 20 16 32 2 Z" fill="url(#body)" stroke="rgba(0,0,0,.1)"/>
+        <!-- window -->
+        <circle cx="32" cy="36" r="8" fill="url(#window)" stroke="rgba(255,255,255,.6)" stroke-width="1.5"/>
+        <circle cx="29" cy="33" r="2.5" fill="rgba(255,255,255,.7)"/>
+        <!-- fins -->
+        <path d="M14 60 L4 86 L14 78 Z" fill="#a78bff"/>
+        <path d="M50 60 L60 86 L50 78 Z" fill="#a78bff"/>
+        <!-- base ring -->
+        <rect x="14" y="76" width="36" height="6" rx="2" fill="#6b3df5"/>
+      </svg>
+      <div class="flame"></div>
+    </div>
+    <div class="flash-bloom"></div>
+    <div class="countdown" id="countdown">T – 03</div>
+  </div>
+
+<script defer src="beemo-landing.js"></script>
+</body>
+</html>

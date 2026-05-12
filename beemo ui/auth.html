@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Beemo — Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg-0:#05030a;
+    --ink:#f4f1ff;
+    --ink-2:rgba(244,241,255,.62);
+    --ink-3:rgba(244,241,255,.38);
+    --line:rgba(255,255,255,.08);
+    --line-2:rgba(255,255,255,.14);
+    --accent-a:#a78bff;
+    --accent-b:#6b3df5;
+    --accent-c:#3a0ea8;
+    --danger:#ff7a8a;
+    --good:#9bf5b8;
+    --ease: cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg-0);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body{min-height:100vh;position:relative;display:grid;place-items:center;padding:80px 20px 60px}
+
+  .sky{
+    position:fixed;inset:0;z-index:0;pointer-events:none;contain:strict;
+    background:
+      radial-gradient(80% 60% at 20% 10%, rgba(110,60,240,.32), transparent 60%),
+      radial-gradient(70% 50% at 90% 20%, rgba(40,90,255,.22), transparent 60%),
+      radial-gradient(60% 40% at 50% 100%, rgba(180,90,255,.18), transparent 60%),
+      linear-gradient(180deg, #07041a 0%, #050310 40%, #060418 100%);
+  }
+  .sky::after{
+    content:"";position:absolute;inset:0;
+    background-image:
+      radial-gradient(1px 1px at 25% 30%, rgba(255,255,255,.6) 50%, transparent 51%),
+      radial-gradient(1px 1px at 70% 65%, rgba(255,255,255,.5) 50%, transparent 51%),
+      radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,.4) 50%, transparent 51%),
+      radial-gradient(1px 1px at 85% 18%, rgba(255,255,255,.5) 50%, transparent 51%),
+      radial-gradient(1px 1px at 12% 70%, rgba(255,255,255,.35) 50%, transparent 51%);
+    opacity:.5;animation: twinkle 8s linear infinite;
+  }
+  @keyframes twinkle{ 0%,100%{opacity:.35} 50%{opacity:.65} }
+  .grain{position:fixed;inset:0;z-index:2;pointer-events:none;mix-blend-mode:overlay;opacity:.08;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  .ambient{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:760px;height:760px;z-index:0;pointer-events:none;
+    background: radial-gradient(closest-side, rgba(167,139,255,.28), transparent 70%);
+    filter: blur(28px); opacity:.6;
+  }
+
+  nav.top{
+    position:fixed;top:18px;left:50%;transform:translateX(-50%);
+    z-index:50;display:flex;align-items:center;gap:6px;
+    padding:8px 10px 8px 18px;border-radius:999px;
+    width: min(720px, calc(100vw - 32px));
+    background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    border:1px solid var(--line-2);
+    backdrop-filter: blur(16px) saturate(130%);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 20px 60px rgba(0,0,0,.45);
+    animation: floatIn 1s var(--ease) both;
+  }
+  @keyframes floatIn{ from{opacity:0;transform:translate(-50%,-12px)} to{opacity:1;transform:translate(-50%,0)} }
+  .brand{display:flex;align-items:center;gap:10px;margin-right:auto;font-weight:500;letter-spacing:.02em}
+  nav.top a.brand{ color:var(--ink); padding:4px 8px 4px 4px; border-radius:999px; text-decoration:none }
+  nav.top a.brand:hover{ background:rgba(255,255,255,.05); border-color:transparent }
+  .brand .dot{width:22px;height:22px;border-radius:999px;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,.5) 0 18%, transparent 30%),
+      radial-gradient(circle at 60% 60%, var(--accent-a) 0 40%, var(--accent-b) 60%, var(--accent-c) 100%);
+    box-shadow: 0 0 18px var(--accent-a), inset 0 0 6px rgba(255,255,255,.6);}
+  nav.top a{
+    color:var(--ink-2);text-decoration:none;font-size:13px;letter-spacing:.01em;
+    padding:8px 14px;border-radius:999px;transition:.3s var(--ease);
+    border:1px solid transparent;
+  }
+  nav.top a:hover{color:var(--ink);background:rgba(255,255,255,.06);border-color:var(--line)}
+
+  /* ===== Auth card ===== */
+  .card{
+    position:relative;z-index:5;width:min(440px, 100%);
+    padding: 32px;border-radius: 28px;
+    background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    border:1px solid var(--line-2);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.18),
+      inset 0 -1px 0 rgba(255,255,255,.04),
+      0 30px 80px rgba(0,0,0,.5);
+    animation: rise .7s var(--ease) both;
+  }
+  @keyframes rise{ from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+  .card .planet{
+    width:54px;height:54px;border-radius:999px;margin:0 auto 20px;position:relative;
+    background:
+      radial-gradient(circle at 32% 28%, rgba(255,255,255,.85) 0%, transparent 22%),
+      radial-gradient(circle at 38% 32%, var(--accent-a) 0 25%, var(--accent-b) 55%, var(--accent-c) 100%);
+    box-shadow: 0 0 32px var(--accent-a), inset 0 0 16px rgba(255,255,255,.3);
+  }
+  .card h1{
+    font-family:'Instrument Serif', serif;font-style:italic;font-weight:400;
+    font-size: 34px;line-height:1.05;text-align:center;letter-spacing:-.01em;
+    margin: 0 0 6px;
+    background: linear-gradient(180deg,#fff, rgba(255,255,255,.7));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .card .lede{ text-align:center;color:var(--ink-2);font-size:14px;margin:0 0 24px }
+
+  /* tabs */
+  .tabs{
+    display:flex;gap:4px;padding:4px;border-radius:999px;
+    background:rgba(255,255,255,.03);border:1px solid var(--line);
+    margin: 0 auto 22px;width:fit-content;position:relative;
+  }
+  .tabs button{
+    border:0;background:transparent;color:var(--ink-2);font:inherit;font-size:13px;
+    padding:8px 22px;border-radius:999px;cursor:pointer;transition:.3s var(--ease);
+    position:relative;z-index:2;letter-spacing:.01em;
+  }
+  .tabs button.active{ color:var(--ink) }
+  .tabs .tab-pill{
+    position:absolute;top:4px;bottom:4px;left:4px;width:50%;border-radius:999px;
+    background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.04));
+    border:1px solid var(--line-2);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.3);
+    transition: transform .35s var(--ease);
+    z-index:1;
+  }
+  body[data-mode="signup"] .tab-pill{ transform: translateX(100%) }
+
+  /* providers */
+  .providers{ display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px }
+  .provider{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 10px;border-radius:14px;cursor:pointer;
+    background: rgba(255,255,255,.04);border:1px solid var(--line-2);
+    color:var(--ink);font:inherit;font-size:13px;font-weight:400;
+    transition:.25s var(--ease);
+  }
+  .provider:hover{ background:rgba(255,255,255,.08); transform: translateY(-1px) }
+  .provider svg{ width:16px;height:16px }
+  .provider.apple svg{ width:16px;height:18px }
+
+  .divider{
+    display:flex;align-items:center;gap:12px;
+    color:var(--ink-3);font:400 10.5px/1 'JetBrains Mono', monospace;
+    letter-spacing:.24em;text-transform:uppercase;margin: 18px 0 16px;
+  }
+  .divider::before, .divider::after{
+    content:"";flex:1;height:1px;background:linear-gradient(90deg, transparent, var(--line-2), transparent);
+  }
+
+  /* form */
+  form.auth{ display:grid;gap:12px }
+  .field{
+    position:relative;display:block;
+  }
+  .field label{
+    position:absolute;left:14px;top:14px;color:var(--ink-3);font-size:13px;
+    pointer-events:none;transition:.25s var(--ease);transform-origin:left center;
+  }
+  .field input{
+    width:100%;padding:18px 14px 8px;border-radius:14px;
+    background: rgba(255,255,255,.03);border:1px solid var(--line);
+    color:var(--ink);font:inherit;font-size:14px;outline:none;
+    transition:.25s var(--ease);
+  }
+  .field input:focus{
+    border-color: var(--accent-a);
+    box-shadow: 0 0 0 4px rgba(167,139,255,.12);
+    background: rgba(255,255,255,.05);
+  }
+  .field input:focus + label,
+  .field input:not(:placeholder-shown) + label{
+    transform: translateY(-9px) scale(.78);
+    color: var(--accent-a);
+  }
+  .field .eye{
+    position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    background:transparent;border:0;color:var(--ink-3);cursor:pointer;padding:6px;border-radius:999px;
+  }
+  .field .eye:hover{ color:var(--ink); background:rgba(255,255,255,.05) }
+  .field .eye svg{ width:18px;height:18px }
+  .field.error input{ border-color: var(--danger); box-shadow: 0 0 0 4px rgba(255,122,138,.12) }
+  .field .hint{
+    margin-top:6px;font-size:11.5px;color:var(--ink-3);
+    font-family:'JetBrains Mono', monospace;letter-spacing:.06em;
+  }
+  .field .hint.bad{ color: var(--danger) }
+  .field .hint.ok{ color: var(--good) }
+
+  /* strength meter */
+  .strength{
+    display:flex;gap:4px;margin-top:8px;
+  }
+  .strength i{
+    flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.08);
+    transition:.3s var(--ease);
+  }
+  .strength.s1 i:nth-child(1){background:var(--danger)}
+  .strength.s2 i:nth-child(-n+2){background:#ffb347}
+  .strength.s3 i:nth-child(-n+3){background:var(--accent-a)}
+  .strength.s4 i{background:var(--good)}
+
+  .row{ display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--ink-2);margin: 4px 0 4px }
+  .row a{ color: var(--accent-a);text-decoration:none }
+  .row a:hover{ text-decoration:underline }
+  .check{ display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none }
+  .check input{ appearance:none;width:16px;height:16px;border-radius:5px;border:1px solid var(--line-2);background:rgba(255,255,255,.04);cursor:pointer;display:grid;place-items:center;transition:.2s var(--ease) }
+  .check input:checked{ background: linear-gradient(135deg, var(--accent-a), var(--accent-b)); border-color: transparent }
+  .check input:checked::after{ content:"";width:8px;height:5px;border-left:2px solid #1a0a3e;border-bottom:2px solid #1a0a3e;transform:rotate(-45deg) translate(0,-1px) }
+
+  .submit{
+    margin-top:6px;padding:14px 18px;border-radius:14px;border:1px solid rgba(255,255,255,.22);
+    background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.04));
+    color:var(--ink);font:500 14px/1 'Inter',sans-serif;cursor:pointer;
+    letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:10px;
+    transition:.25s var(--ease);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 18px 50px rgba(0,0,0,.4);
+  }
+  .submit:hover{ background: linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.06)); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 22px 60px rgba(0,0,0,.5), 0 0 40px -10px var(--accent-a) }
+  .submit[disabled]{ opacity:.7; cursor:wait }
+  .submit .spinner{ width:14px;height:14px;border-radius:999px;border:1.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .8s linear infinite;display:none }
+  .submit[disabled] .spinner{ display:inline-block }
+  .submit[disabled] .arrow{ display:none }
+  @keyframes spin{ to{ transform:rotate(360deg) } }
+
+  .swap{
+    text-align:center;color:var(--ink-2);font-size:13px;margin-top:18px;
+  }
+  .swap a{ color:var(--accent-a);text-decoration:none;font-weight:400 }
+  .swap a:hover{ text-decoration:underline }
+
+  .terms{
+    text-align:center;color:var(--ink-3);font-size:11.5px;line-height:1.55;margin-top:14px;
+  }
+  .terms a{ color: var(--ink-2);text-decoration:underline;text-decoration-color:var(--line-2) }
+
+  /* signup-only fields hidden in login */
+  body[data-mode="login"] [data-signup-only]{ display:none }
+
+  .legal{
+    position:fixed;left:0;right:0;bottom:18px;z-index:30;
+    text-align:center;color:var(--ink-3);font:400 10.5px/1 'JetBrains Mono',monospace;
+    letter-spacing:.22em;text-transform:uppercase;
+  }
+</style>
+</head>
+<body data-mode="login">
+  <div class="sky"></div>
+  <div class="ambient"></div>
+  <div class="grain"></div>
+
+  <nav class="top">
+    <a href="Beemo.html" class="brand" aria-label="Beemo — home">
+      <div class="dot" aria-hidden="true"></div>
+      <b>Beemo</b>
+      <span style="color:var(--ink-3);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-left:6px">v 0.4 · ambient</span>
+    </a>
+    <a href="Beemo.html">Home</a>
+  </nav>
+
+  <main class="card">
+    <div class="planet" aria-hidden="true"></div>
+    <h1 id="title">Welcome back.</h1>
+    <p class="lede" id="lede">Sign in to your Beemo. We'll have everything just as you left it.</p>
+
+    <div class="tabs" role="tablist">
+      <span class="tab-pill" aria-hidden="true"></span>
+      <button type="button" class="active" data-mode="login" role="tab">Login</button>
+      <button type="button" data-mode="signup" role="tab">Sign up</button>
+    </div>
+
+    <div class="providers" aria-label="Sign in with provider">
+      <button type="button" class="provider" data-prov="google">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8a12 12 0 1 1 0-24c3 0 5.7 1.1 7.8 3l5.7-5.7A20 20 0 1 0 24 44a20 20 0 0 0 19.8-17.1c.2-1.1.2-2.3.2-3.4 0-1-.1-2-.4-3z"/>
+          <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8A12 12 0 0 1 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/>
+          <path fill="#4CAF50" d="M24 44c5 0 9.6-1.9 13-5l-6-5.1c-1.9 1.3-4.3 2.1-7 2.1-5.3 0-9.7-3.4-11.3-8L6.1 33C9 39.5 16 44 24 44z"/>
+          <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4.3 5.9l6 5.1c-.4.4 6.4-4.7 6.4-14.5 0-1-.1-2-.4-3z"/>
+        </svg>
+        Google
+      </button>
+      <button type="button" class="provider apple" data-prov="apple">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.3.9 1.2 1.9 2.6 3.3 2.6 1.3-.1 1.8-.9 3.4-.9s2 .9 3.4.8c1.4 0 2.3-1.3 3.2-2.5.7-.9 1.2-1.9 1.6-3-2.5-.9-3.3-3.6-3.3-3.9zM13.8 4.6c.7-.9 1.2-2 1-3.2-1 .1-2.3.7-3 1.5-.7.8-1.3 2-1.1 3.1 1.2.1 2.4-.6 3.1-1.4z"/>
+        </svg>
+        Apple
+      </button>
+      <button type="button" class="provider" data-prov="github">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.3 1.9 1.3 1.1 1.9 2.9 1.3 3.6 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.3-3.2-.1-.3-.6-1.6.1-3.2 0 0 1-.3 3.3 1.2a11.3 11.3 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.6.2 2.9.1 3.2.8.8 1.3 1.9 1.3 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/>
+        </svg>
+        GitHub
+      </button>
+    </div>
+
+    <div class="divider">or use email</div>
+
+    <form class="auth" id="authForm" novalidate>
+      <div class="field" data-signup-only>
+        <input type="text" id="name" placeholder=" " autocomplete="name" />
+        <label for="name">Full name</label>
+      </div>
+      <div class="field">
+        <input type="email" id="email" placeholder=" " autocomplete="email" required />
+        <label for="email">Email</label>
+        <div class="hint" id="emailHint"></div>
+      </div>
+      <div class="field">
+        <input type="password" id="password" placeholder=" " autocomplete="current-password" required minlength="8" />
+        <label for="password">Password</label>
+        <button type="button" class="eye" id="togglePw" aria-label="Show password">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <div class="strength" id="strength" data-signup-only><i></i><i></i><i></i><i></i></div>
+      </div>
+
+      <div class="row">
+        <label class="check"><input type="checkbox" id="remember" checked /> <span data-login-text>Remember me</span><span data-signup-text style="display:none">I agree to receive updates</span></label>
+        <a href="#" data-login-only id="forgot">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="submit" id="submitBtn">
+        <span class="arrow">
+          <span data-login-text>Sign in</span><span data-signup-text style="display:none">Create account</span>
+        </span>
+        <span class="spinner" aria-hidden="true"></span>
+      </button>
+    </form>
+
+    <p class="swap" id="swap">
+      <span data-login-text>New to Beemo? <a href="#" data-go="signup">Create an account</a></span>
+      <span data-signup-text style="display:none">Already orbiting? <a href="#" data-go="login">Sign in</a></span>
+    </p>
+
+    <p class="terms" data-signup-only>
+      By creating an account you agree to Beemo's <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
+    </p>
+  </main>
+
+  <div class="legal">© Beemo Labs · ambient intelligence</div>
+
+<script defer src="beemo-auth.js"></script>
+</body>
+</html>
