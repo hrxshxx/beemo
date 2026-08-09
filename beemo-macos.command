@@ -12,7 +12,7 @@ ok()   { printf "  ${GREEN}✓${RESET} %s\n" "$1"; }
 warn() { printf "  ${YELLOW}!${RESET} %s\n" "$1"; }
 die()  { printf "  ${RED}✗${RESET} %s\n\n" "$1"; printf "Press return to close."; read -r _; exit 1; }
 
-clear
+clear 2>/dev/null || true
 say ""
 say "  ${BOLD}beemo${RESET}"
 say "  ${DIM}ambient intelligence that lives on your machine${RESET}"
